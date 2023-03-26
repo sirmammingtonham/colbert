@@ -31,7 +31,7 @@ class ColBERT(nn.Module):
         }
 
     def pairwise_maxsim(self, query_outputs, doc_outputs):
-        sims = torch.einsum("bqh,bdh->bqd", query_outputs, doc_outputs)
+        sims = query_outputs @ doc_outputs.mT # torch.einsum("bqh,bdh->bqd", query_outputs, doc_outputs)
         scores = sims.max(-1).values.sum(-1)
         return scores
 
