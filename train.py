@@ -1,6 +1,6 @@
 import os
 from src.metrics import EvalMetricCallback
-from src.data import get_dataset
+from src.data import get_dataset, TrainCollator
 from src.model import ColBERT
 from transformers import BertModel, BertTokenizerFast, Trainer, TrainingArguments
 from datasets import load_from_disk
@@ -27,7 +27,7 @@ def main(dataset_path, data_files, training_args, model_str="bert-base-uncased")
         train_dataset=ds["train"],
         callbacks=[EvalMetricCallback(model, ds["valid"])],
         tokenizer=tokenizer,
-        data_collator=None,
+        data_collator=TrainCollator(tokenizer),
         report_to="wandb",
     )
 
