@@ -3,7 +3,7 @@ from src.metrics import EvalMetricCallback
 from src.data import get_dataset, TrainCollator
 from src.model import ColBERT
 from transformers import BertModel, BertTokenizerFast, Trainer, TrainingArguments
-from datasets import load_from_disk
+from datasets import load_from_disk, DatasetDict
 
 SEED = 808
 
@@ -13,7 +13,7 @@ def main(dataset_path, data_files, training_args, model_str="bert-base-uncased")
     tokenizer = BertTokenizerFast.from_pretrained(model_str)
     tokenizer.add_special_tokens({"additional_special_tokens": ["[Q]", "[D]"]})
 
-    if os.path.isfile(dataset_path):
+    if os.path.isdir(dataset_path):
         ds = load_from_disk(dataset_path)
     else:
         ds = get_dataset(tokenizer, **data_files)
@@ -26,9 +26,7 @@ def main(dataset_path, data_files, training_args, model_str="bert-base-uncased")
         args=training_args,
         train_dataset=ds["train"],
         callbacks=[EvalMetricCallback(model, ds["valid"])],
-        tokenizer=tokenizer,
-        data_collator=TrainCollator(tokenizer),
-        report_to="wandb",
+        data_collator=None,
     )
 
     train_results = trainer.train(
@@ -47,14 +45,16 @@ if __name__ == "__main__":
         output_dir="./models",
         do_train=True,
         do_eval=True,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
+        per_device_train_batch_size=128,
+        per_device_eval_batch_size=128,
         learning_rate=3e-6,
         logging_dir="./logs",
-        push_to_hub=True,
+        report_to="wandb",
+        remove_unused_columns=False,
+        save_total_limit=5,
         seed=SEED,
     )
-    dataset_path = "data/dataset.hf"
+    dataset_path = "/scratch/eaj73/dataset.hf"
     data_files = {
         "train_path": "data/triples.train.small.tsv",
         "qrels_val_path": "data/qrels.dev.small.tsv",

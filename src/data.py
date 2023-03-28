@@ -120,7 +120,7 @@ class TrainCollator:
         """
         # "we pad [query] with BERT’s special [mask] tokens up to length Nq"
         # add maxlen mask tokens and let tokenizer handle truncation
-        queries = [f"[CLS] [Q] {text} {MASK_PADDING}" for text in features["query"]]
+        queries = [f"[CLS] [Q] {text['query']} {MASK_PADDING}" for text in features]
         query_tokenized = self.tokenizer(
             queries,
             max_length=32,
@@ -130,8 +130,8 @@ class TrainCollator:
         )
 
         # "Unlike queries, we do not append [mask] tokens to documents."
-        doc_positives = [f"[CLS] [D] {text}" for text in features["positive"]]
-        doc_negatives = [f"[CLS] [D] {text}" for text in features["negative"]]
+        doc_positives = [f"[CLS] [D] {text['positive']}" for text in features]
+        doc_negatives = [f"[CLS] [D] {text['negative']}" for text in features]
         doc_tokenized = self.tokenizer(
             doc_positives + doc_negatives,
             max_length=128,

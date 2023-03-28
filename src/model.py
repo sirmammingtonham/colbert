@@ -75,7 +75,7 @@ class ColBERT(nn.Module):
             [(token not in self.skip_list) and (token != 0) for token in doc]
             for doc in doc_input_ids.cpu().tolist()
         ]
-        mask = torch.tensor(mask, dtype=torch.float32).unsqueeze(-1)
+        mask = torch.tensor(mask, dtype=torch.float32, device='cuda').unsqueeze(-1)
         doc_embedding = doc_embedding * mask
         doc_embedding = F.normalize(input=doc_embedding, p=2, dim=2)
         #
